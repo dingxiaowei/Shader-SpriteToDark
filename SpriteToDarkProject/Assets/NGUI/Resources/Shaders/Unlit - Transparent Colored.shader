@@ -47,9 +47,10 @@ Shader "Unlit/Transparent Colored"
 				fixed4 color : COLOR;
 			};
 	
+			v2f o;
+
 			v2f vert (appdata_t v)
 			{
-				v2f o;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.texcoord = v.texcoord;
 				o.color = v.color;
@@ -58,7 +59,15 @@ Shader "Unlit/Transparent Colored"
 				
 			fixed4 frag (v2f IN) : COLOR
 			{
-				fixed4 col = tex2D(_MainTex, IN.texcoord) * IN.color;
+				fixed4 col = tex2D(_MainTex, IN.texcoord);  
+				if (IN.color.r > 0.19 && IN.color.r<0.21)  
+				{
+					float grey =  Luminance(col);
+					col.rgb = float3(grey, grey, grey); 
+				}else{
+					col.rgb*=IN.color.rgb;
+				}
+				col.a *= IN.color.a;  
 				return col;
 			}
 			ENDCG

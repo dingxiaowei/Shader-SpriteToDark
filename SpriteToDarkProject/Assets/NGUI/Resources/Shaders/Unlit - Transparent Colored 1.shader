@@ -51,9 +51,10 @@ Shader "Hidden/Unlit/Transparent Colored 1"
 				float2 worldPos : TEXCOORD1;
 			};
 
+			v2f o;
+
 			v2f vert (appdata_t v)
 			{
-				v2f o;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.color = v.color;
 				o.texcoord = v.texcoord;
@@ -67,7 +68,15 @@ Shader "Hidden/Unlit/Transparent Colored 1"
 				float2 factor = (float2(1.0, 1.0) - abs(IN.worldPos)) * _ClipArgs0;
 			
 				// Sample the texture
-				half4 col = tex2D(_MainTex, IN.texcoord) * IN.color;
+				fixed4 col = tex2D(_MainTex, IN.texcoord);  
+				if (IN.color.r > 0.19 && IN.color.r<0.21)  
+				{
+					float grey =  Luminance(col);
+					col.rgb = float3(grey, grey, grey); 
+				}else{
+					col.rgb*=IN.color.rgb;
+				}
+				col.a *= IN.color.a;  
 				col.a *= clamp( min(factor.x, factor.y), 0.0, 1.0);
 				return col;
 			}
